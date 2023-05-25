@@ -22,9 +22,10 @@ function onChange(control, oldValue, newValue, isLoading) {
   // Make the asynchronous AJAX call
   ga.getXML(timeThun);
   function timeThun(response) {
-    var answer = response.responseXML.documentElement.getAttribute("answer");
-    g_form.setValue("fee", endDate);
-    // Handle the response data
-    // ...
-  }
+      var answer = response.responseXML.documentElement.getAttribute("answer");
+      g_form.setValue("fee", endDate);
+      // Handle the response data
+      // ...
+    }
+
 }

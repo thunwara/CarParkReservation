@@ -1,0 +1,18 @@
+{
+  "Server Development": {
+    "Script Includes": {
+      "ParkingFeeCalculator": {
+        "sys_id": "2c7ec23c97326110f5b2f8890353af7c",
+        "SYS_PACKAGE": "global",
+        "packageName": "Global",
+        "scopeId": "global",
+        "scopeName": "Global",
+        "scopeValue": "global",
+        "SERVER_MOD_TIME": 1684956237000,
+        "CURRENT_SERVER_MOD_TIME": 1684956237000,
+        "LOCAL_MOD_TIME": 1685006901853,
+        "CURRENT_LOCAL_MOD_TIME": 1685006901853
+      }
+    }
+  }
+}
