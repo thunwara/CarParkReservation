@@ -5,7 +5,7 @@ function onChange(control, oldValue, newValue, isLoading) {
 
   //Get time and vehicle rid from portal form
   var startDate = new Date(g_form.getValue("start")).getTime();
-  var endDate = new Date(g_form.getValue("end")).getTime();
+  var endDate = new Date(g_form.getValue("end"));
   var nowDate = new Date().getTime();
   var regId = g_form.getValue("vehicle_registration_number");
 
@@ -22,10 +22,9 @@ function onChange(control, oldValue, newValue, isLoading) {
   // Make the asynchronous AJAX call
   ga.getXML(timeThun);
   function timeThun(response) {
-      var answer = response.responseXML.documentElement.getAttribute("answer");
-      g_form.setValue("fee", "hello");
-      // Handle the response data
-      // ...
-    }
-
+    var answer = response.responseXML.documentElement.getAttribute("answer");
+    g_form.setValue("fee", endDate);
+    // Handle the response data
+    // ...
+  }
 }
