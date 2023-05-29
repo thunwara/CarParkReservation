@@ -18,13 +18,9 @@ Object.extendsObject(AbstractAjaxProcessor, {
     carRecord.addEncodedQuery("active=true^variables.a0c57d8a47262110b6bcf2e7536d4317="+carRID+"^variables.79d5bd8a47262110b6bcf2e7536d439a<javascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')^variables.20f531ca47262110b6bcf2e7536d4368>javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')^NQactive=true^variables.a0c57d8a47262110b6bcf2e7536d4317="+carRID+"^variables.79d5bd8a47262110b6bcf2e7536d439aBETWEENjavascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')@javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')^ORvariables.20f531ca47262110b6bcf2e7536d4368BETWEENjavascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')@javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')");
     carRecord.query();
     
-    // var count = 0;
-    // while (carRecord.next()){
-        //Count number of record
-        //If count > 0 -> Found item on query option
-        // count = count + 1;
-    // }
-    return count;
+    // gs.log("carRID" + carRID);
+	gs.log("startDateTime" + startDateTime);
+	// gs.log("endDateTime" + endDateTime);
     },
     type: 'ParkingFeeCalculator'
 });
