@@ -1,26 +1,63 @@
 var ParkingFeeCalculator = Class.create();
-ParkingFeeCalculator.prototype =
-Object.extendsObject(AbstractAjaxProcessor, {
-    getTime: function(){
+ParkingFeeCalculator.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getTime: function () {
+    // Pass Parameter from Client-Script
+    var carRID = this.getParameter("sysparm_car_regis_number");
+    var startDateTimeString = this.getParameter("sysparm_start_time");
+    var endDateTimeString = this.getParameter("sysparm_end_time");
 
-    //Pass Parameter from Client-Script
-    var carRID = this.getParameter('sysparm_car_regis_number');
-    var startDateTime = this.getParameter('sysparm_start_time');
-    var endDateTime = this.getParameter('sysparm_end_time');
+    // Convert startDateTimeString and endDateTimeString to GlideDateTime objects
+    var startDateTime = new GlideDateTime();
+    startDateTime.setDisplayValue(startDateTimeString);
 
-    //Query Record
-    var carRecord = new GlideRecord('sc_req_item');
+    var endDateTime = new GlideDateTime();
+    endDateTime.setDisplayValue(endDateTimeString);
 
-    //Query SELECT carID is carRID
-    carRecord.addEncodedQuery("active=true^cat_item.nameSTARTSWITHCar Park Reservations"+carRID);
+    // Query Record
+    var carRecord = new GlideRecord("sc_req_item");
 
-    //Query SELECT Date time in Range of startTime and endTime
-    carRecord.addEncodedQuery("active=true^variables.a0c57d8a47262110b6bcf2e7536d4317="+carRID+"^variables.79d5bd8a47262110b6bcf2e7536d439a<javascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')^variables.20f531ca47262110b6bcf2e7536d4368>javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')^NQactive=true^variables.a0c57d8a47262110b6bcf2e7536d4317="+carRID+"^variables.79d5bd8a47262110b6bcf2e7536d439aBETWEENjavascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')@javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')^ORvariables.20f531ca47262110b6bcf2e7536d4368BETWEENjavascript:gs.dateGenerate('" +startDateSplit[0]+ "','"+ startDateSplit[1] +"')@javascript:gs.dateGenerate('" + endDateSplit[0] + "','" + endDateSplit[1] + "')");
+    // Query SELECT carID is carRID
+    carRecord.addEncodedQuery(
+      "active=true^cat_item.nameSTARTSWITHCar Park Reservations" + carRID
+    );
     carRecord.query();
-    
-    // gs.log("carRID" + carRID);
-	gs.log("startDateTime" + startDateTime);
-	// gs.log("endDateTime" + endDateTime);
-    },
-    type: 'ParkingFeeCalculator'
+
+    // Calculate duration in minutes
+    var duration = GlideDateTime.subtract(startDateTime, endDateTime);
+    var durationInMinutes = Math.ceil(duration.getNumericValue() / (1000 * 60)); // Convert duration to minutes
+
+    gs.info("Duration in minutes: " + durationInMinutes);
+
+    // Convert duration to hours and round up
+    var durationInHours = Math.ceil(durationInMinutes / 60); // Convert duration to hours and round up
+
+    gs.info("Duration in hours: " + durationInHours);
+
+    // Calculate fee
+    var fee;
+    if (durationInHours < 60) {
+      fee = durationInHours * 10;
+    } else if (durationInHours < 240) {
+      fee = durationInHours * 15;
+    } else if (durationInHours < 480) {
+      fee = durationInHours * 15;
+    } else {
+      fee = 200;
+    }
+
+    // Create a JSON object to hold the parameters
+    var response = {
+      durationMinutes: durationInMinutes,
+      durationHours: durationInHours,
+    };
+
+    // Convert the JSON object to a string
+    var jsonResponse = JSON.stringify(response);
+
+    // Set the response type and send the JSON string back to the client script
+    this.setResponseType(this.JSON);
+    return jsonResponse;
+  },
+
+  type: "ParkingFeeCalculator",
 });
