@@ -1,39 +1,81 @@
-function onChange(control, oldValue, newValue, isLoading) {
-  if (isLoading || newValue === "") {
-      return;
-  }
+var ParkingFeeCalculator = Class.create();
+ParkingFeeCalculator.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+    calculateFee: function() {
+        // Pass Parameter from Client-Script
+        var carRID = this.getParameter("sysparm_car_regis_number");
+        var startDateTimeString = this.getParameter("sysparm_start_time");
+        var endDateTimeString = this.getParameter("sysparm_end_time");
 
-  // Get time and vehicle rid from portal form
-  var startDate = new Date(g_form.getValue("start"));
-  var endDate = new Date(g_form.getValue("end"));
-  var nowDate = new Date().getTime();
-  var regId = g_form.getValue("vehicle_registration_number");
+        // Convert startDateTimeString and endDateTimeString to GlideDateTime objects
+        var startDateTime = new GlideDateTime();
+        startDateTime.setDisplayValue(startDateTimeString);
 
-  // Check if startDate is before now or endDate is before startDate or endDate is before nowDate
-  if (nowDate > startDate || endDate < startDate || endDate < nowDate) {
-      g_form.addErrorMessage("Your start date or end date is not correct.");
-      g_form.clearValue("start");
-      g_form.clearValue("end");
-  } else {
-      // Create a GlideAjax object
-      var ga = new GlideAjax("ParkingFeeCalculator");
-      ga.addParam("sysparm_name", "calculateFee");
-      ga.addParam("sysparm_car_regis_number", regId);
-      ga.addParam("sysparm_start_time", g_form.getValue("start"));
-      ga.addParam("sysparm_end_time", g_form.getValue("end"));
+        var endDateTime = new GlideDateTime();
+        endDateTime.setDisplayValue(endDateTimeString);
 
-      // Make the asynchronous AJAX call
-      ga.getXML(timeThunCallback);
-  }
+        // Query Record
+        var carRecord = new GlideRecord("sc_req_item");
 
-  function timeThunCallback(response) {
-      var jsonResponse = response.responseXML.documentElement.getAttribute("answer");
-      var result = JSON.parse(jsonResponse);
+        // // Query SELECT carID is carRID
+        // carRecord.addEncodedQuery(
+        //     "active=true^cat_item.nameSTARTSWITHCar Park Reservations" + carRID
+        // );
+        // carRecord.query();
 
-      var durationHours = result.durationHours;
-      var totalFee = result.totalFee;
-      g_form.setValue("duration", durationHours + " hour(s)");
-      g_form.setValue("fee", totalFee + " bath");
+		// Query SELECT carID is carRID and overlaps with the given start and end time
+        carRecord.addEncodedQuery(
+            "active=true^cat_item.nameSTARTSWITHCar Park Reservations" + carRID +
+            "^start_date_time<=javascript:gs.dateGenerate('" + endDateTimeString + "','start_date_time')^end_date_time>=javascript:gs.dateGenerate('" + startDateTimeString + "','end_date_time')"
+        );
+        carRecord.query();
 
-  }
-}
+        // Check if there are any overlapping reservations
+        if (carRecord.hasNext()) {
+            // There is an overlapping reservation
+            gs.info("Car has another reservation at the same time");
+            return false;
+        }
+
+
+
+
+        // Calculate duration in minutes
+        var duration = GlideDateTime.subtract(startDateTime, endDateTime);
+        var durationInMinutes = Math.ceil(duration.getNumericValue() / (1000 * 60)); // Convert duration to minutes
+
+        gs.info("Duration in minutes: " + durationInMinutes);
+
+        // Convert duration to hours and round up
+        var durationInHours = Math.ceil(durationInMinutes / 60); // Convert duration to hours and round up
+
+        gs.info("Duration in hours: " + durationInHours);
+
+        // Calculate fee
+        var fee;
+        if (durationInHours < 60) {
+            fee = durationInHours * 10;
+        } else if (durationInHours < 240) {
+            fee = durationInHours * 15;
+        } else if (durationInHours < 480) {
+            fee = durationInHours * 15;
+        } else {
+            fee = 200;
+        }
+
+        // Create a JSON object to hold the parameters
+        var response = {
+            durationMinutes: durationInMinutes,
+            durationHours: durationInHours,
+            totalFee: fee,
+        };
+
+        // Convert the JSON object to a string
+        var jsonResponse = JSON.stringify(response);
+
+        // Set the response type and send the JSON string back to the client script
+        this.setResponseType(this.JSON);
+        return jsonResponse;
+    },
+
+    type: "ParkingFeeCalculator",
+});
